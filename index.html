@@ -872,12 +872,7 @@
 
   // =================== ADMIN ===================
   const ADMIN_EMAIL = 'emanuelmth@gmail.com';
-  const ADMIN_HASH  = '9f36de77d7016e0235254ba9ccafa47f192ee4bb63e881aabfee2ce4babc8e29';
-
-  async function hashStr(str) {
-    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
-  }
+  const ADMIN_PWD   = 'quiz26lucresho123';
 
   function checkAdminRoute() {
     const ov = document.getElementById('adminOverlay');
@@ -918,12 +913,11 @@
     history.replaceState(null, '', window.location.pathname);
   }
 
-  async function doLogin() {
+  function doLogin() {
     const email = document.getElementById('adminEmail').value.trim();
     const pass  = document.getElementById('adminPass').value;
     const msg   = document.getElementById('loginMsg');
-    const hash  = await hashStr(pass);
-    if (email === ADMIN_EMAIL && hash === ADMIN_HASH) {
+    if (email === ADMIN_EMAIL && pass === ADMIN_PWD) {
       sessionStorage.setItem('adminOk', '1');
       document.getElementById('adminLogin').style.display = 'none';
       document.getElementById('adminPanel').style.display = 'flex';
