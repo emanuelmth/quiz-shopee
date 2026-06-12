@@ -869,93 +869,164 @@
   }
 
 
+
+  // =================== ADMIN ===================
+  const ADMIN_EMAIL = 'emanuelmth@gmail.com';
+  const ADMIN_HASH  = '9f36de77d7016e0235254ba9ccafa47f192ee4bb63e881aabfee2ce4babc8e29';
+
+  async function hashStr(str) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+  }
+
+  function checkAdminRoute() {
+    if (window.location.hash === '#admin') toggleAdmin(true);
+  }
+
+  window.addEventListener('hashchange', () => {
+    if (window.location.hash === '#admin') toggleAdmin(true);
+    else document.getElementById('adminOverlay').classList.remove('open');
+  });
+
+  function toggleAdmin(forceOpen) {
+    const ov = document.getElementById('adminOverlay');
+    if (forceOpen) {
+      ov.classList.add('open');
+    } else {
+      ov.classList.toggle('open');
+      if (!ov.classList.contains('open')) {
+        history.replaceState(null, '', window.location.pathname);
+      }
+    }
+    if (ov.classList.contains('open')) {
+      const logged = sessionStorage.getItem('adminOk') === '1';
+      document.getElementById('adminLogin').style.display = logged ? 'none' : 'block';
+      document.getElementById('adminPanel').style.display = logged ? 'flex' : 'none';
+      if (logged) loadConfig();
+    }
+  }
+
+  function closeAdmin() {
+    document.getElementById('adminOverlay').classList.remove('open');
+    history.replaceState(null, '', window.location.pathname);
+  }
+
+  async function doLogin() {
+    const email = document.getElementById('adminEmail').value.trim();
+    const pass  = document.getElementById('adminPass').value;
+    const msg   = document.getElementById('loginMsg');
+    const hash  = await hashStr(pass);
+    if (email === ADMIN_EMAIL && hash === ADMIN_HASH) {
+      sessionStorage.setItem('adminOk', '1');
+      document.getElementById('adminLogin').style.display = 'none';
+      document.getElementById('adminPanel').style.display = 'flex';
+      loadConfig();
+    } else {
+      msg.textContent = 'Email ou senha incorretos.';
+      msg.className = 'admin-msg error';
+      msg.style.display = 'block';
+      setTimeout(() => msg.style.display = 'none', 3000);
+    }
+  }
+
+  function doLogout() {
+    sessionStorage.removeItem('adminOk');
+    document.getElementById('adminPanel').style.display = 'none';
+    document.getElementById('adminLogin').style.display = 'block';
+    document.getElementById('adminEmail').value = '';
+    document.getElementById('adminPass').value = '';
+  }
+
+  function loadConfig() {
+    document.getElementById('cfgVsl1').value   = localStorage.getItem('vsl1') || '';
+    document.getElementById('cfgVsl2').value   = localStorage.getItem('vsl2') || '';
+    document.getElementById('cfgMeta').value   = localStorage.getItem('pixelMeta') || '';
+    document.getElementById('cfgGoogle').value = localStorage.getItem('pixelGoogle') || '';
+    document.getElementById('cfgTiktok').value = localStorage.getItem('pixelTiktok') || '';
+    document.getElementById('cfgWh1').value    = localStorage.getItem('webhook1') || '';
+    document.getElementById('cfgWh2').value    = localStorage.getItem('webhook2') || '';
+  }
+
+  function saveConfig() {
+    localStorage.setItem('vsl1',        document.getElementById('cfgVsl1').value.trim());
+    localStorage.setItem('vsl2',        document.getElementById('cfgVsl2').value.trim());
+    localStorage.setItem('pixelMeta',   document.getElementById('cfgMeta').value.trim());
+    localStorage.setItem('pixelGoogle', document.getElementById('cfgGoogle').value.trim());
+    localStorage.setItem('pixelTiktok', document.getElementById('cfgTiktok').value.trim());
+    localStorage.setItem('webhook1',    document.getElementById('cfgWh1').value.trim());
+    localStorage.setItem('webhook2',    document.getElementById('cfgWh2').value.trim());
+    applyPixels();
+    applyVslEmbeds();
+    const msg = document.getElementById('saveMsg');
+    msg.textContent = '✓ Configurações salvas com sucesso!';
+    msg.className = 'admin-msg success';
+    msg.style.display = 'block';
+    setTimeout(() => { msg.style.display = 'none'; closeAdmin(); }, 2000);
+  }
+
+  function applyVslEmbeds() {
+    const vsl1 = localStorage.getItem('vsl1');
+    const vsl2 = localStorage.getItem('vsl2');
+    const box1 = document.getElementById('vsl1Box');
+    const box2 = document.getElementById('vsl2Box');
+    if (box1 && vsl1) box1.innerHTML = vsl1;
+    if (box2 && vsl2) box2.innerHTML = vsl2;
+  }
+
+  function applyPixels() {
+    const meta   = localStorage.getItem('pixelMeta');
+    const google = localStorage.getItem('pixelGoogle');
+    const tiktok = localStorage.getItem('pixelTiktok');
+    if (meta && !document.getElementById('px-meta')) {
+      const s = document.createElement('script');
+      s.id = 'px-meta';
+      s.innerHTML = `!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${meta}');fbq('track','PageView');`;
+      document.head.appendChild(s);
+    }
+    if (google && !document.getElementById('px-google')) {
+      const s = document.createElement('script');
+      s.id = 'px-google'; s.async = true;
+      s.src = `https://www.googletagmanager.com/gtag/js?id=${google}`;
+      document.head.appendChild(s);
+      const s2 = document.createElement('script');
+      s2.innerHTML = `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${google}');`;
+      document.head.appendChild(s2);
+    }
+    if (tiktok && !document.getElementById('px-tiktok')) {
+      const s = document.createElement('script');
+      s.id = 'px-tiktok';
+      s.innerHTML = `!function(w,d,t){w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie"];ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t){for(var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e};ttq.load=function(e,n){var i="https://analytics.tiktok.com/i18n/pixel/events.js";ttq._i=ttq._i||{};ttq._i[e]=[];ttq._i[e]._u=i;ttq._t=ttq._t||{};ttq._t[e]=+new Date;ttq._o=ttq._o||{};ttq._o[e]=n||{};var o=document.createElement("script");o.type="text/javascript";o.async=!0;o.src=i+"?sdkid="+e+"&lib="+t;var a=document.getElementsByTagName("script")[0];a.parentNode.insertBefore(o,a)};ttq.load('${tiktok}');ttq.page();}(window,document,'ttq');`;
+      document.head.appendChild(s);
+    }
+  }
+
+  // ---- WEBHOOKS ----
+  async function sendWebhook(type, extraData = {}) {
+    const url = localStorage.getItem(type === 1 ? 'webhook1' : 'webhook2');
+    if (!url) return;
+    const payload = {
+      nome: window._userName || '',
+      whatsapp: window._userWhats || '',
+      tipo: type === 1 ? 'lead_entrou' : 'lead_completou',
+      timestamp: new Date().toISOString(),
+      ...extraData
+    };
+    try {
+      await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    } catch(e) { console.warn('Webhook error:', e); }
+  }
+
+  // Aplicar ao carregar a página
+  window.addEventListener('load', () => {
+    checkAdminRoute();
+    applyPixels();
+    applyVslEmbeds();
+  });
+  // =================== FIM ADMIN ===================
+
 </script>
 
-<!-- OVERLAY ADMIN -->
-<div id="adminOverlay">
-  <div class="admin-box">
-
-    <!-- LOGIN -->
-    <div id="adminLogin">
-      <div class="admin-title">Área restrita</div>
-      <div class="admin-subtitle">Acesso exclusivo para administradores</div>
-      <div class="admin-field">
-        <label>Email</label>
-        <input type="email" id="adminEmail" placeholder="seu@email.com">
-      </div>
-      <div class="admin-field">
-        <label>Senha</label>
-        <input type="password" id="adminPass" placeholder="••••••••" onkeydown="if(event.key==='Enter') doLogin()">
-      </div>
-      <div class="admin-msg" id="loginMsg"></div>
-      <div class="admin-row">
-        <button class="admin-btn admin-btn-cancel" onclick="closeAdmin()">Cancelar</button>
-        <button class="admin-btn admin-btn-save" onclick="doLogin()">Entrar</button>
-      </div>
-    </div>
-
-    <!-- PAINEL -->
-    <div id="adminPanel" style="display:none; flex-direction:column; gap:20px;">
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <div class="admin-title">Painel de configuração</div>
-        <span style="font-size:11px; color:rgba(255,255,255,0.3); cursor:pointer;" onclick="doLogout()">Sair</span>
-      </div>
-
-      <hr class="admin-divider">
-      <div class="admin-section-title">🎬 Vídeos</div>
-
-      <div class="admin-field">
-        <label>VSL 1 — Embed (Frame 5, antes da perg. 4)</label>
-        <textarea id="cfgVsl1" placeholder='<iframe src="https://www.youtube.com/embed/SEU_ID" frameborder="0" allowfullscreen></iframe>'></textarea>
-      </div>
-
-      <div class="admin-field">
-        <label>VSL 2 — Embed (Página de resultado)</label>
-        <textarea id="cfgVsl2" placeholder='<iframe src="https://www.youtube.com/embed/SEU_ID" frameborder="0" allowfullscreen></iframe>'></textarea>
-      </div>
-
-      <hr class="admin-divider">
-      <div class="admin-section-title">🔗 Webhooks N8N</div>
-
-      <div class="admin-field">
-        <label>Webhook 1 — Lead que entrou no quiz</label>
-        <input type="text" id="cfgWh1" placeholder="https://seu-worker.workers.dev/webhook1">
-        <span style="font-size:10px; color:rgba(255,255,255,0.3);">Disparado ao clicar em "Liberar Acesso"</span>
-      </div>
-
-      <div class="admin-field">
-        <label>Webhook 2 — Lead que completou o quiz</label>
-        <input type="text" id="cfgWh2" placeholder="https://seu-worker.workers.dev/webhook2">
-        <span style="font-size:10px; color:rgba(255,255,255,0.3);">Disparado ao chegar na página de resultado</span>
-      </div>
-
-      <hr class="admin-divider">
-      <div class="admin-section-title">📊 Pixels de rastreamento</div>
-
-      <div class="admin-field">
-        <label>Meta Ads — Pixel ID</label>
-        <input type="text" id="cfgMeta" placeholder="ex: 1234567890123456">
-      </div>
-
-      <div class="admin-field">
-        <label>Google Ads — ID de conversão</label>
-        <input type="text" id="cfgGoogle" placeholder="ex: AW-1234567890">
-      </div>
-
-      <div class="admin-field">
-        <label>TikTok Ads — Pixel ID</label>
-        <input type="text" id="cfgTiktok" placeholder="ex: ABCDE1234567890">
-      </div>
-
-      <div class="admin-msg" id="saveMsg"></div>
-      <div class="admin-row">
-        <button class="admin-btn admin-btn-cancel" onclick="closeAdmin()">Fechar</button>
-        <button class="admin-btn admin-btn-save" onclick="saveConfig()">Salvar tudo</button>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-</body>
-</html>
