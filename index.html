@@ -1039,3 +1039,91 @@
 
 </script>
 
+<!-- OVERLAY ADMIN -->
+<div id="adminOverlay">
+  <div class="admin-box">
+
+    <!-- LOGIN -->
+    <div id="adminLogin">
+      <div class="admin-title">Área restrita</div>
+      <div class="admin-subtitle">Acesso exclusivo para administradores</div>
+      <div class="admin-field">
+        <label>Email</label>
+        <input type="email" id="adminEmail" placeholder="seu@email.com">
+      </div>
+      <div class="admin-field">
+        <label>Senha</label>
+        <input type="password" id="adminPass" placeholder="••••••••" onkeydown="if(event.key==='Enter') doLogin()">
+      </div>
+      <div class="admin-msg" id="loginMsg"></div>
+      <div class="admin-row">
+        <button class="admin-btn admin-btn-cancel" onclick="closeAdmin()">Cancelar</button>
+        <button class="admin-btn admin-btn-save" onclick="doLogin()">Entrar</button>
+      </div>
+    </div>
+
+    <!-- PAINEL -->
+    <div id="adminPanel" style="display:none; flex-direction:column; gap:20px;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div class="admin-title">Painel de configuração</div>
+        <span style="font-size:11px; color:rgba(255,255,255,0.3); cursor:pointer;" onclick="doLogout()">Sair</span>
+      </div>
+
+      <hr class="admin-divider">
+      <div class="admin-section-title">🎬 Vídeos</div>
+
+      <div class="admin-field">
+        <label>VSL 1 — Embed (tela de vídeo, antes da perg. 4)</label>
+        <textarea id="cfgVsl1" placeholder='<iframe src="https://www.youtube.com/embed/SEU_ID" frameborder="0" allowfullscreen></iframe>'></textarea>
+      </div>
+
+      <div class="admin-field">
+        <label>VSL 2 — Embed (Página de resultado)</label>
+        <textarea id="cfgVsl2" placeholder='<iframe src="https://www.youtube.com/embed/SEU_ID" frameborder="0" allowfullscreen></iframe>'></textarea>
+      </div>
+
+      <hr class="admin-divider">
+      <div class="admin-section-title">🔗 Webhooks N8N</div>
+
+      <div class="admin-field">
+        <label>Webhook 1 — Lead que entrou no quiz</label>
+        <input type="text" id="cfgWh1" placeholder="https://seu-worker.workers.dev/webhook1">
+        <span style="font-size:10px; color:rgba(255,255,255,0.3);">Disparado ao clicar em "Liberar Acesso"</span>
+      </div>
+
+      <div class="admin-field">
+        <label>Webhook 2 — Lead que completou o quiz</label>
+        <input type="text" id="cfgWh2" placeholder="https://seu-worker.workers.dev/webhook2">
+        <span style="font-size:10px; color:rgba(255,255,255,0.3);">Disparado ao chegar na página de resultado</span>
+      </div>
+
+      <hr class="admin-divider">
+      <div class="admin-section-title">📊 Pixels de rastreamento</div>
+
+      <div class="admin-field">
+        <label>Meta Ads — Pixel ID</label>
+        <input type="text" id="cfgMeta" placeholder="ex: 1234567890123456">
+      </div>
+
+      <div class="admin-field">
+        <label>Google Ads — ID de conversão</label>
+        <input type="text" id="cfgGoogle" placeholder="ex: AW-1234567890">
+      </div>
+
+      <div class="admin-field">
+        <label>TikTok Ads — Pixel ID</label>
+        <input type="text" id="cfgTiktok" placeholder="ex: ABCDE1234567890">
+      </div>
+
+      <div class="admin-msg" id="saveMsg"></div>
+      <div class="admin-row">
+        <button class="admin-btn admin-btn-cancel" onclick="closeAdmin()">Fechar</button>
+        <button class="admin-btn admin-btn-save" onclick="saveConfig()">Salvar tudo</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
