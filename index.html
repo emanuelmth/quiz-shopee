@@ -1020,12 +1020,20 @@
     } catch(e) { console.warn('Webhook error:', e); }
   }
 
-  // Aplicar ao carregar a página
+  // Aplicar ao carregar a página — múltiplos fallbacks para garantir
+  document.addEventListener('DOMContentLoaded', () => {
+    checkAdminRoute();
+    applyPixels();
+    applyVslEmbeds();
+  });
   window.addEventListener('load', () => {
     checkAdminRoute();
     applyPixels();
     applyVslEmbeds();
   });
+  // Fallback extra para hash
+  setTimeout(() => { checkAdminRoute(); }, 100);
+  setTimeout(() => { checkAdminRoute(); }, 500);
   // =================== FIM ADMIN ===================
 
 </script>
