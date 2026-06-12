@@ -880,16 +880,21 @@
   }
 
   function checkAdminRoute() {
+    const ov = document.getElementById('adminOverlay');
+    if (!ov) return;
     if (window.location.hash === '#admin') toggleAdmin(true);
   }
 
   window.addEventListener('hashchange', () => {
+    const ov = document.getElementById('adminOverlay');
+    if (!ov) return;
     if (window.location.hash === '#admin') toggleAdmin(true);
-    else document.getElementById('adminOverlay').classList.remove('open');
+    else ov.classList.remove('open');
   });
 
   function toggleAdmin(forceOpen) {
     const ov = document.getElementById('adminOverlay');
+    if (!ov) return;
     if (forceOpen) {
       ov.classList.add('open');
     } else {
@@ -900,8 +905,10 @@
     }
     if (ov.classList.contains('open')) {
       const logged = sessionStorage.getItem('adminOk') === '1';
-      document.getElementById('adminLogin').style.display = logged ? 'none' : 'block';
-      document.getElementById('adminPanel').style.display = logged ? 'flex' : 'none';
+      const loginEl = document.getElementById('adminLogin');
+      const panelEl = document.getElementById('adminPanel');
+      if (loginEl) loginEl.style.display = logged ? 'none' : 'block';
+      if (panelEl) panelEl.style.display = logged ? 'flex' : 'none';
       if (logged) loadConfig();
     }
   }
