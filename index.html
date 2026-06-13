@@ -978,7 +978,9 @@
     box.style.border = 'none';
     box.style.aspectRatio = 'auto';
     box.style.height = 'auto';
-    box.style.minHeight = '0';
+    box.style.minHeight = '200px';
+    box.style.maxWidth = '400px';
+    box.style.margin = '0 auto';
 
     // Criar um container temporário para parsear o HTML colado
     const temp = document.createElement('div');
@@ -1003,8 +1005,8 @@
       document.body.appendChild(newScript);
     });
 
-    // Ajustar iframe/video — deixar o player definir a proporcao
-    const media = box.querySelector('iframe, video, embed, object');
+    // Ajustar player — inclui custom elements como vturb-smartplayer
+    const media = box.querySelector('iframe, video, embed, object, vturb-smartplayer');
     if (media) {
       media.style.width = '100%';
       media.style.maxWidth = '100%';
