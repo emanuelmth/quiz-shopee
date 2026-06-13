@@ -659,9 +659,6 @@
     if (next === 4) {
       setTimeout(() => applyVslEmbeds(), 300);
     }
-    if (next === 8) {
-      setTimeout(() => applyVslEmbeds(), 300);
-    }
     if (next === 7) {
       setTimeout(() => document.getElementById('progressWrap').style.display = 'none', 1500);
       document.getElementById('header').style.display = 'none';
@@ -671,6 +668,7 @@
       document.getElementById('header').style.display = 'none';
       document.getElementById('progressWrap').style.display = 'none';
       setTimeout(() => animateResult(), 400);
+      setTimeout(() => applyVslEmbeds(), 300);
       sendWebhook(2, { quiz_completo: true });
     }
   }
