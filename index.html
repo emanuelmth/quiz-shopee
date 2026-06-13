@@ -965,31 +965,56 @@
     setTimeout(() => { msg.style.display = 'none'; closeAdmin(); }, 2000);
   }
 
+  function injectEmbed(box, embed) {
+    if (!box || !embed) return;
+    // Evita reinjetar se já tem conteúdo
+    if (box.dataset.embedded === '1') return;
+    box.dataset.embedded = '1';
+
+    box.innerHTML = '';
+    box.style.padding = '0';
+    box.style.overflow = 'hidden';
+    box.style.display = 'block';
+
+    // Criar um container temporário para parsear o HTML colado
+    const temp = document.createElement('div');
+    temp.innerHTML = embed;
+
+    // Mover todos os nós (divs, iframes) para o box — exceto scripts
+    Array.from(temp.childNodes).forEach(node => {
+      if (node.tagName === 'SCRIPT') return; // scripts tratados separadamente
+      box.appendChild(node.cloneNode(true));
+    });
+
+    // Executar os scripts manualmente (VTurb, Panda, etc.)
+    const scripts = temp.querySelectorAll('script');
+    scripts.forEach(oldScript => {
+      const newScript = document.createElement('script');
+      // Copiar atributos (src, id, type, async, etc.)
+      Array.from(oldScript.attributes).forEach(attr => {
+        newScript.setAttribute(attr.name, attr.value);
+      });
+      // Copiar conteúdo inline se houver
+      if (oldScript.textContent) newScript.textContent = oldScript.textContent;
+      document.body.appendChild(newScript);
+    });
+
+    // Ajustar iframe/video se existir
+    const media = box.querySelector('iframe, video, embed, object');
+    if (media) {
+      media.style.width = '100%';
+      media.style.height = '100%';
+      media.style.minHeight = '240px';
+      media.style.border = 'none';
+      media.style.display = 'block';
+    }
+  }
+
   function applyVslEmbeds() {
     const vsl1 = localStorage.getItem('vsl1');
     const vsl2 = localStorage.getItem('vsl2');
-    const box1 = document.getElementById('vsl1Box');
-    const box2 = document.getElementById('vsl2Box');
-
-    function injectEmbed(box, embed) {
-      if (!box || !embed) return;
-      box.innerHTML = embed;
-      box.style.padding = '0';
-      box.style.overflow = 'hidden';
-      // Forçar iframe/video a preencher o container
-      const media = box.querySelector('iframe, video, embed, object');
-      if (media) {
-        media.style.width = '100%';
-        media.style.height = '100%';
-        media.style.minHeight = '240px';
-        media.style.border = 'none';
-        media.style.display = 'block';
-        media.setAttribute('allow', 'autoplay; fullscreen; picture-in-picture; encrypted-media');
-      }
-    }
-
-    injectEmbed(box1, vsl1);
-    injectEmbed(box2, vsl2);
+    injectEmbed(document.getElementById('vsl1Box'), vsl1);
+    injectEmbed(document.getElementById('vsl2Box'), vsl2);
   }
 
   function applyPixels() {
