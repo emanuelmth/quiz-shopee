@@ -967,14 +967,18 @@
 
   function injectEmbed(box, embed) {
     if (!box || !embed) return;
-    // Evita reinjetar se já tem conteúdo
     if (box.dataset.embedded === '1') return;
     box.dataset.embedded = '1';
 
     box.innerHTML = '';
     box.style.padding = '0';
-    box.style.overflow = 'hidden';
+    box.style.overflow = 'visible';
     box.style.display = 'block';
+    box.style.background = 'transparent';
+    box.style.border = 'none';
+    box.style.aspectRatio = 'auto';
+    box.style.height = 'auto';
+    box.style.minHeight = '0';
 
     // Criar um container temporário para parsear o HTML colado
     const temp = document.createElement('div');
@@ -999,14 +1003,14 @@
       document.body.appendChild(newScript);
     });
 
-    // Ajustar iframe/video se existir
+    // Ajustar iframe/video — deixar o player definir a proporcao
     const media = box.querySelector('iframe, video, embed, object');
     if (media) {
       media.style.width = '100%';
-      media.style.height = '100%';
-      media.style.minHeight = '240px';
+      media.style.maxWidth = '100%';
       media.style.border = 'none';
       media.style.display = 'block';
+      media.style.borderRadius = '14px';
     }
   }
 
