@@ -970,8 +970,26 @@
     const vsl2 = localStorage.getItem('vsl2');
     const box1 = document.getElementById('vsl1Box');
     const box2 = document.getElementById('vsl2Box');
-    if (box1 && vsl1) box1.innerHTML = vsl1;
-    if (box2 && vsl2) box2.innerHTML = vsl2;
+
+    function injectEmbed(box, embed) {
+      if (!box || !embed) return;
+      box.innerHTML = embed;
+      box.style.padding = '0';
+      box.style.overflow = 'hidden';
+      // Forçar iframe/video a preencher o container
+      const media = box.querySelector('iframe, video, embed, object');
+      if (media) {
+        media.style.width = '100%';
+        media.style.height = '100%';
+        media.style.minHeight = '240px';
+        media.style.border = 'none';
+        media.style.display = 'block';
+        media.setAttribute('allow', 'autoplay; fullscreen; picture-in-picture; encrypted-media');
+      }
+    }
+
+    injectEmbed(box1, vsl1);
+    injectEmbed(box2, vsl2);
   }
 
   function applyPixels() {
