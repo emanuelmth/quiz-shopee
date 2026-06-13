@@ -986,24 +986,24 @@
     const temp = document.createElement('div');
     temp.innerHTML = embed;
 
-    // Mover todos os nós (divs, iframes) para o box — exceto scripts
+    // 1º: inserir os elementos não-script (o <vturb-smartplayer>, divs, etc.)
     Array.from(temp.childNodes).forEach(node => {
-      if (node.tagName === 'SCRIPT') return; // scripts tratados separadamente
+      if (node.tagName === 'SCRIPT') return;
       box.appendChild(node.cloneNode(true));
     });
 
-    // Executar os scripts manualmente (VTurb, Panda, etc.)
-    const scripts = temp.querySelectorAll('script');
-    scripts.forEach(oldScript => {
-      const newScript = document.createElement('script');
-      // Copiar atributos (src, id, type, async, etc.)
-      Array.from(oldScript.attributes).forEach(attr => {
-        newScript.setAttribute(attr.name, attr.value);
+    // 2º: executar os scripts COM DELAY, garantindo que o elemento do player já existe no DOM
+    const scripts = Array.from(temp.querySelectorAll('script'));
+    setTimeout(() => {
+      scripts.forEach(oldScript => {
+        const newScript = document.createElement('script');
+        Array.from(oldScript.attributes).forEach(attr => {
+          newScript.setAttribute(attr.name, attr.value);
+        });
+        if (oldScript.textContent) newScript.textContent = oldScript.textContent;
+        document.body.appendChild(newScript);
       });
-      // Copiar conteúdo inline se houver
-      if (oldScript.textContent) newScript.textContent = oldScript.textContent;
-      document.body.appendChild(newScript);
-    });
+    }, 200);
 
     // Ajustar player — inclui custom elements como vturb-smartplayer
     const media = box.querySelector('iframe, video, embed, object, vturb-smartplayer');
