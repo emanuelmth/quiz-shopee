@@ -657,7 +657,7 @@
       document.getElementById('progressStep').textContent = step.label;
     }
     if (next === 4) {
-      setTimeout(() => applyVslEmbeds(), 300);
+      setTimeout(() => applyVsl1(), 300);
     }
     if (next === 7) {
       setTimeout(() => document.getElementById('progressWrap').style.display = 'none', 1500);
@@ -668,7 +668,7 @@
       document.getElementById('header').style.display = 'none';
       document.getElementById('progressWrap').style.display = 'none';
       setTimeout(() => animateResult(), 400);
-      setTimeout(() => applyVslEmbeds(), 300);
+      setTimeout(() => applyVsl2(), 300);
       sendWebhook(2, { quiz_completo: true });
     }
   }
@@ -1009,10 +1009,9 @@
     if (box.dataset.embedded === '1') return;
     box.dataset.embedded = '1';
 
-    // Resetar box para receber o player direto (sem iframe)
     box.innerHTML = '';
     box.style.padding = '0';
-    box.style.overflow = 'visible';
+    box.style.overflow = 'hidden';
     box.style.display = 'block';
     box.style.background = 'transparent';
     box.style.border = 'none';
@@ -1021,37 +1020,66 @@
     box.style.minHeight = '0';
     box.style.maxWidth = '400px';
     box.style.margin = '0 auto';
+    box.style.borderRadius = '14px';
 
-    // Parsear o embed
-    const temp = document.createElement('div');
-    temp.innerHTML = embed;
+    const iframe = document.createElement('iframe');
+    iframe.style.width = '100%';
+    iframe.style.border = 'none';
+    iframe.style.display = 'block';
+    iframe.style.borderRadius = '14px';
+    // sandbox permite scripts, mesma origem, popups e interação — mantém isolamento mas libera comandos
+    iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-presentation allow-forms');
+    iframe.setAttribute('allow', 'autoplay; fullscreen; encrypted-media; picture-in-picture; accelerometer; gyroscope; clipboard-write');
+    iframe.setAttribute('allowfullscreen', 'true');
+    iframe.setAttribute('playsinline', 'true');
+    iframe.scrolling = 'no';
 
-    // 1º: inserir os elementos não-script (o <vturb-smartplayer>) DIRETO no box
-    Array.from(temp.childNodes).forEach(node => {
-      if (node.tagName === 'SCRIPT') return;
-      box.appendChild(node.cloneNode(true));
-    });
+    const srcdoc = `<!DOCTYPE html><html><head><meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <style>html,body{margin:0;padding:0;background:transparent;overflow:hidden}
+      *{-webkit-tap-highlight-color:transparent}</style>
+      </head><body>${embed}
+      <script>
+        function reportHeight(){
+          var h = document.body.scrollHeight;
+          if(h>0) parent.postMessage({type:'vsl-height', boxId:'${box.id}', height:h}, '*');
+        }
+        var obs = new MutationObserver(reportHeight);
+        obs.observe(document.body, {childList:true, subtree:true, attributes:true});
+        setInterval(reportHeight, 500);
+        window.addEventListener('load', reportHeight);
+      <\/script>
+      </body></html>`;
 
-    // 2º: executar os scripts com pequeno delay (player encontra o elemento já no DOM da página)
-    const scripts = Array.from(temp.querySelectorAll('script'));
-    setTimeout(() => {
-      scripts.forEach(oldScript => {
-        const newScript = document.createElement('script');
-        Array.from(oldScript.attributes).forEach(attr => {
-          newScript.setAttribute(attr.name, attr.value);
-        });
-        if (oldScript.textContent) newScript.textContent = oldScript.textContent;
-        document.body.appendChild(newScript);
-      });
-    }, 100);
+    iframe.srcdoc = srcdoc;
+    iframe.style.height = '225px';
+    box.appendChild(iframe);
   }
 
-    function applyVslEmbeds() {
+  window.addEventListener('message', function(ev) {
+    if (ev.data && ev.data.type === 'vsl-height') {
+      const box = document.getElementById(ev.data.boxId);
+      if (box) {
+        const iframe = box.querySelector('iframe');
+        if (iframe && ev.data.height > 50) {
+          iframe.style.height = ev.data.height + 'px';
+        }
+      }
+    }
+  });
+
+    function applyVsl1() {
     const vsl1 = (REMOTE_CONFIG && REMOTE_CONFIG.vsl1) ? REMOTE_CONFIG.vsl1 : DEFAULT_VSL1;
-    const vsl2 = (REMOTE_CONFIG && REMOTE_CONFIG.vsl2) ? REMOTE_CONFIG.vsl2 : DEFAULT_VSL2;
     injectEmbed(document.getElementById('vsl1Box'), vsl1);
+  }
+
+  function applyVsl2() {
+    const vsl2 = (REMOTE_CONFIG && REMOTE_CONFIG.vsl2) ? REMOTE_CONFIG.vsl2 : DEFAULT_VSL2;
     injectEmbed(document.getElementById('vsl2Box'), vsl2);
   }
+
+  // Mantida por compatibilidade (não injeta nada sozinha agora)
+  function applyVslEmbeds() {}
 
   function applyPixels() {
     const meta   = (REMOTE_CONFIG && REMOTE_CONFIG.pixelMeta)   ? REMOTE_CONFIG.pixelMeta   : '';
