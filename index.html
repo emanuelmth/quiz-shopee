@@ -884,7 +884,7 @@
       console.warn('Config remota indisponivel, usando padroes.', e);
     }
     applyPixels();
-    applyVslEmbeds();
+    // applyVslEmbeds NÃO é chamado aqui — vídeos só injetam ao chegar na tela certa
   }
 
   function checkAdminRoute() {
@@ -1009,9 +1009,10 @@
     if (box.dataset.embedded === '1') return;
     box.dataset.embedded = '1';
 
+    // Resetar box para receber o player direto (sem iframe)
     box.innerHTML = '';
     box.style.padding = '0';
-    box.style.overflow = 'hidden';
+    box.style.overflow = 'visible';
     box.style.display = 'block';
     box.style.background = 'transparent';
     box.style.border = 'none';
@@ -1020,49 +1021,30 @@
     box.style.minHeight = '0';
     box.style.maxWidth = '400px';
     box.style.margin = '0 auto';
-    box.style.borderRadius = '14px';
 
-    const iframe = document.createElement('iframe');
-    iframe.style.width = '100%';
-    iframe.style.border = 'none';
-    iframe.style.display = 'block';
-    iframe.style.borderRadius = '14px';
-    iframe.setAttribute('allow', 'autoplay; fullscreen; encrypted-media; picture-in-picture');
-    iframe.setAttribute('allowfullscreen', 'true');
-    iframe.scrolling = 'no';
+    // Parsear o embed
+    const temp = document.createElement('div');
+    temp.innerHTML = embed;
 
-    const srcdoc = `<!DOCTYPE html><html><head><meta charset="utf-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1">
-      <style>html,body{margin:0;padding:0;background:transparent;overflow:hidden}</style>
-      </head><body>${embed}
-      <script>
-        function reportHeight(){
-          var h = document.body.scrollHeight;
-          if(h>0) parent.postMessage({type:'vsl-height', boxId:'${box.id}', height:h}, '*');
-        }
-        var obs = new MutationObserver(reportHeight);
-        obs.observe(document.body, {childList:true, subtree:true, attributes:true});
-        setInterval(reportHeight, 500);
-        window.addEventListener('load', reportHeight);
-      <\/script>
-      </body></html>`;
+    // 1º: inserir os elementos não-script (o <vturb-smartplayer>) DIRETO no box
+    Array.from(temp.childNodes).forEach(node => {
+      if (node.tagName === 'SCRIPT') return;
+      box.appendChild(node.cloneNode(true));
+    });
 
-    iframe.srcdoc = srcdoc;
-    iframe.style.height = '225px';
-    box.appendChild(iframe);
+    // 2º: executar os scripts com pequeno delay (player encontra o elemento já no DOM da página)
+    const scripts = Array.from(temp.querySelectorAll('script'));
+    setTimeout(() => {
+      scripts.forEach(oldScript => {
+        const newScript = document.createElement('script');
+        Array.from(oldScript.attributes).forEach(attr => {
+          newScript.setAttribute(attr.name, attr.value);
+        });
+        if (oldScript.textContent) newScript.textContent = oldScript.textContent;
+        document.body.appendChild(newScript);
+      });
+    }, 100);
   }
-
-  window.addEventListener('message', function(ev) {
-    if (ev.data && ev.data.type === 'vsl-height') {
-      const box = document.getElementById(ev.data.boxId);
-      if (box) {
-        const iframe = box.querySelector('iframe');
-        if (iframe && ev.data.height > 50) {
-          iframe.style.height = ev.data.height + 'px';
-        }
-      }
-    }
-  });
 
     function applyVslEmbeds() {
     const vsl1 = (REMOTE_CONFIG && REMOTE_CONFIG.vsl1) ? REMOTE_CONFIG.vsl1 : DEFAULT_VSL1;
