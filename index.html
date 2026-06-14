@@ -871,6 +871,21 @@
   // =================== ADMIN ===================
   const ADMIN_EMAIL = 'emanuelmth@gmail.com';
   const ADMIN_PWD   = 'quiz26lucresho123';
+  const WORKER_URL  = 'https://wandering-scene-6c84.emanuelmth.workers.dev';
+  let REMOTE_CONFIG = {};
+  const DEFAULT_VSL1 = "<vturb-smartplayer id=\"vid-6a2bd0f87e787f7e02c9a017\" style=\"display: block; margin: 0 auto; width: 100%; max-width: 400px;\"></vturb-smartplayer> <script type=\"text/javascript\"> var s=document.createElement(\"script\"); s.src=\"https://scripts.converteai.net/70f33469-099b-43dc-a311-6d9c384ad00e/players/6a2bd0f87e787f7e02c9a017/v4/player.js\", s.async=!0,document.head.appendChild(s); <\/script>";
+  const DEFAULT_VSL2 = "<vturb-smartplayer id=\"vid-6a2bd1643244f7b854ac3cee\" style=\"display: block; margin: 0 auto; width: 100%; max-width: 400px;\"></vturb-smartplayer> <script type=\"text/javascript\"> var s=document.createElement(\"script\"); s.src=\"https://scripts.converteai.net/70f33469-099b-43dc-a311-6d9c384ad00e/players/6a2bd1643244f7b854ac3cee/v4/player.js\", s.async=!0,document.head.appendChild(s); <\/script>";
+
+  async function loadRemoteConfig() {
+    try {
+      const r = await fetch(WORKER_URL + '/config?t=' + Date.now());
+      if (r.ok) REMOTE_CONFIG = await r.json();
+    } catch(e) {
+      console.warn('Config remota indisponivel, usando padroes.', e);
+    }
+    applyPixels();
+    applyVslEmbeds();
+  }
 
   function checkAdminRoute() {
     const ov = document.getElementById('adminOverlay');
@@ -917,6 +932,7 @@
     const msg   = document.getElementById('loginMsg');
     if (email === ADMIN_EMAIL && pass === ADMIN_PWD) {
       sessionStorage.setItem('adminOk', '1');
+      sessionStorage.setItem('adminPwd', pass);
       document.getElementById('adminLogin').style.display = 'none';
       document.getElementById('adminPanel').style.display = 'flex';
       loadConfig();
@@ -937,38 +953,62 @@
   }
 
   function loadConfig() {
-    document.getElementById('cfgVsl1').value   = localStorage.getItem('vsl1') || '';
-    document.getElementById('cfgVsl2').value   = localStorage.getItem('vsl2') || '';
-    document.getElementById('cfgMeta').value   = localStorage.getItem('pixelMeta') || '';
-    document.getElementById('cfgGoogle').value = localStorage.getItem('pixelGoogle') || '';
-    document.getElementById('cfgTiktok').value = localStorage.getItem('pixelTiktok') || '';
-    document.getElementById('cfgWh1').value    = localStorage.getItem('webhook1') || '';
-    document.getElementById('cfgWh2').value    = localStorage.getItem('webhook2') || '';
+    document.getElementById('cfgVsl1').value   = REMOTE_CONFIG.vsl1 || '';
+    document.getElementById('cfgVsl2').value   = REMOTE_CONFIG.vsl2 || '';
+    document.getElementById('cfgMeta').value   = REMOTE_CONFIG.pixelMeta || '';
+    document.getElementById('cfgGoogle').value = REMOTE_CONFIG.pixelGoogle || '';
+    document.getElementById('cfgTiktok').value = REMOTE_CONFIG.pixelTiktok || '';
+    document.getElementById('cfgWh1').value    = REMOTE_CONFIG.webhook1 || '';
+    document.getElementById('cfgWh2').value    = REMOTE_CONFIG.webhook2 || '';
   }
 
-  function saveConfig() {
-    localStorage.setItem('vsl1',        document.getElementById('cfgVsl1').value.trim());
-    localStorage.setItem('vsl2',        document.getElementById('cfgVsl2').value.trim());
-    localStorage.setItem('pixelMeta',   document.getElementById('cfgMeta').value.trim());
-    localStorage.setItem('pixelGoogle', document.getElementById('cfgGoogle').value.trim());
-    localStorage.setItem('pixelTiktok', document.getElementById('cfgTiktok').value.trim());
-    localStorage.setItem('webhook1',    document.getElementById('cfgWh1').value.trim());
-    localStorage.setItem('webhook2',    document.getElementById('cfgWh2').value.trim());
-    applyPixels();
-    applyVslEmbeds();
+  async function saveConfig() {
+    const config = {
+      vsl1:        document.getElementById('cfgVsl1').value.trim(),
+      vsl2:        document.getElementById('cfgVsl2').value.trim(),
+      pixelMeta:   document.getElementById('cfgMeta').value.trim(),
+      pixelGoogle: document.getElementById('cfgGoogle').value.trim(),
+      pixelTiktok: document.getElementById('cfgTiktok').value.trim(),
+      webhook1:    document.getElementById('cfgWh1').value.trim(),
+      webhook2:    document.getElementById('cfgWh2').value.trim(),
+    };
+
     const msg = document.getElementById('saveMsg');
-    msg.textContent = '✓ Configurações salvas com sucesso!';
+    msg.textContent = 'Salvando...';
     msg.className = 'admin-msg success';
     msg.style.display = 'block';
-    setTimeout(() => { msg.style.display = 'none'; closeAdmin(); }, 2000);
+
+    try {
+      const r = await fetch(WORKER_URL + '/config', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-Password': sessionStorage.getItem('adminPwd') || ''
+        },
+        body: JSON.stringify(config)
+      });
+
+      if (r.ok) {
+        REMOTE_CONFIG = config;
+        msg.textContent = 'Salvo! As mudancas ja valem para todos os visitantes.';
+        msg.className = 'admin-msg success';
+        setTimeout(() => { msg.style.display = 'none'; closeAdmin(); }, 2500);
+      } else {
+        const err = await r.json().catch(() => ({}));
+        msg.textContent = 'Erro ao salvar: ' + (err.error || r.status);
+        msg.className = 'admin-msg error';
+      }
+    } catch(e) {
+      msg.textContent = 'Erro de conexao com o servidor.';
+      msg.className = 'admin-msg error';
+    }
   }
 
-  function injectEmbed(box, embed) {
+    function injectEmbed(box, embed) {
     if (!box || !embed) return;
     if (box.dataset.embedded === '1') return;
     box.dataset.embedded = '1';
 
-    // Resetar estilo do box
     box.innerHTML = '';
     box.style.padding = '0';
     box.style.overflow = 'hidden';
@@ -982,7 +1022,6 @@
     box.style.margin = '0 auto';
     box.style.borderRadius = '14px';
 
-    // Criar um iframe isolado para rodar o player sem conflitos
     const iframe = document.createElement('iframe');
     iframe.style.width = '100%';
     iframe.style.border = 'none';
@@ -992,13 +1031,11 @@
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.scrolling = 'no';
 
-    // Documento interno do iframe com o embed
     const srcdoc = `<!DOCTYPE html><html><head><meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1">
       <style>html,body{margin:0;padding:0;background:transparent;overflow:hidden}</style>
       </head><body>${embed}
       <script>
-        // Ajustar altura do iframe pai conforme o player carrega
         function reportHeight(){
           var h = document.body.scrollHeight;
           if(h>0) parent.postMessage({type:'vsl-height', boxId:'${box.id}', height:h}, '*');
@@ -1011,11 +1048,10 @@
       </body></html>`;
 
     iframe.srcdoc = srcdoc;
-    iframe.style.height = '225px'; // altura inicial até o player reportar
+    iframe.style.height = '225px';
     box.appendChild(iframe);
   }
 
-  // Receber a altura real do player de dentro do iframe
   window.addEventListener('message', function(ev) {
     if (ev.data && ev.data.type === 'vsl-height') {
       const box = document.getElementById(ev.data.boxId);
@@ -1028,22 +1064,18 @@
     }
   });
 
-  // Embeds fixos (padrão para todos os visitantes)
-  const DEFAULT_VSL1 = "<vturb-smartplayer id=\"vid-6a2bd0f87e787f7e02c9a017\" style=\"display: block; margin: 0 auto; width: 100%; max-width: 400px;\"></vturb-smartplayer> <script type=\"text/javascript\"> var s=document.createElement(\"script\"); s.src=\"https://scripts.converteai.net/70f33469-099b-43dc-a311-6d9c384ad00e/players/6a2bd0f87e787f7e02c9a017/v4/player.js\", s.async=!0,document.head.appendChild(s); <\/script>";
-  const DEFAULT_VSL2 = "<vturb-smartplayer id=\"vid-6a2bd1643244f7b854ac3cee\" style=\"display: block; margin: 0 auto; width: 100%; max-width: 400px;\"></vturb-smartplayer> <script type=\"text/javascript\"> var s=document.createElement(\"script\"); s.src=\"https://scripts.converteai.net/70f33469-099b-43dc-a311-6d9c384ad00e/players/6a2bd1643244f7b854ac3cee/v4/player.js\", s.async=!0,document.head.appendChild(s); <\/script>";
-
-  function applyVslEmbeds() {
-    // Embeds fixos têm prioridade (garante que todos os visitantes vejam)
-    const vsl1 = DEFAULT_VSL1 || localStorage.getItem('vsl1');
-    const vsl2 = DEFAULT_VSL2 || localStorage.getItem('vsl2');
+    function applyVslEmbeds() {
+    const vsl1 = (REMOTE_CONFIG && REMOTE_CONFIG.vsl1) ? REMOTE_CONFIG.vsl1 : DEFAULT_VSL1;
+    const vsl2 = (REMOTE_CONFIG && REMOTE_CONFIG.vsl2) ? REMOTE_CONFIG.vsl2 : DEFAULT_VSL2;
     injectEmbed(document.getElementById('vsl1Box'), vsl1);
     injectEmbed(document.getElementById('vsl2Box'), vsl2);
   }
 
   function applyPixels() {
-    const meta   = localStorage.getItem('pixelMeta');
-    const google = localStorage.getItem('pixelGoogle');
-    const tiktok = localStorage.getItem('pixelTiktok');
+    const meta   = (REMOTE_CONFIG && REMOTE_CONFIG.pixelMeta)   ? REMOTE_CONFIG.pixelMeta   : '';
+    const google = (REMOTE_CONFIG && REMOTE_CONFIG.pixelGoogle) ? REMOTE_CONFIG.pixelGoogle : '';
+    const tiktok = (REMOTE_CONFIG && REMOTE_CONFIG.pixelTiktok) ? REMOTE_CONFIG.pixelTiktok : '';
+
     if (meta && !document.getElementById('px-meta')) {
       const s = document.createElement('script');
       s.id = 'px-meta';
@@ -1067,7 +1099,7 @@
     }
   }
 
-  // ---- WEBHOOKS ----
+    // ---- WEBHOOKS ----
   async function sendWebhook(type, extraData = {}) {
     const url = localStorage.getItem(type === 1 ? 'webhook1' : 'webhook2');
     if (!url) return;
@@ -1090,11 +1122,7 @@
   // Aplicar ao carregar a página — múltiplos fallbacks para garantir
   document.addEventListener('DOMContentLoaded', () => {
     checkAdminRoute();
-    applyPixels();
-  });
-  window.addEventListener('load', () => {
-    checkAdminRoute();
-    applyPixels();
+    loadRemoteConfig();
   });
   // Fallback extra para hash
   setTimeout(() => { checkAdminRoute(); }, 100);
