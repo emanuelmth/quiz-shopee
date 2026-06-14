@@ -1028,9 +1028,14 @@
     }
   });
 
+  // Embeds fixos (padrão para todos os visitantes)
+  const DEFAULT_VSL1 = "<vturb-smartplayer id=\"vid-6a2bd0f87e787f7e02c9a017\" style=\"display: block; margin: 0 auto; width: 100%; max-width: 400px;\"></vturb-smartplayer> <script type=\"text/javascript\"> var s=document.createElement(\"script\"); s.src=\"https://scripts.converteai.net/70f33469-099b-43dc-a311-6d9c384ad00e/players/6a2bd0f87e787f7e02c9a017/v4/player.js\", s.async=!0,document.head.appendChild(s); <\/script>";
+  const DEFAULT_VSL2 = "<vturb-smartplayer id=\"vid-6a2bd1643244f7b854ac3cee\" style=\"display: block; margin: 0 auto; width: 100%; max-width: 400px;\"></vturb-smartplayer> <script type=\"text/javascript\"> var s=document.createElement(\"script\"); s.src=\"https://scripts.converteai.net/70f33469-099b-43dc-a311-6d9c384ad00e/players/6a2bd1643244f7b854ac3cee/v4/player.js\", s.async=!0,document.head.appendChild(s); <\/script>";
+
   function applyVslEmbeds() {
-    const vsl1 = localStorage.getItem('vsl1');
-    const vsl2 = localStorage.getItem('vsl2');
+    // Embeds fixos têm prioridade (garante que todos os visitantes vejam)
+    const vsl1 = DEFAULT_VSL1 || localStorage.getItem('vsl1');
+    const vsl2 = DEFAULT_VSL2 || localStorage.getItem('vsl2');
     injectEmbed(document.getElementById('vsl1Box'), vsl1);
     injectEmbed(document.getElementById('vsl2Box'), vsl2);
   }
