@@ -406,11 +406,13 @@
 <div class="screen" id="screen-4">
   <div class="vsl-content">
     <div class="vsl-label">Assista ao vídeo abaixo:</div>
-    <div class="vsl-box" id="vsl1Box">
-      <div class="vsl-play">▶</div>
-      <span>Clique para assistir</span>
+    <div class="vsl-video-wrap" style="position:relative; width:100%; max-width:400px; margin:0 auto;">
+      <div class="vsl-box" id="vsl1Box">
+        <div class="vsl-play">▶</div>
+        <span>Clique para assistir</span>
+      </div>
+      <button class="btn-continuar" id="btnContinuarVsl1" onclick="goToScreen(5)" style="display:none; position:absolute; left:50%; bottom:16px; transform:translateX(-50%); z-index:10; white-space:nowrap;">Continuar →</button>
     </div>
-    <button class="btn-continuar" id="btnContinuarVsl1" onclick="goToScreen(5)" style="display:none;">Continuar →</button>
   </div>
 </div>
 
@@ -1082,9 +1084,9 @@
       const btn = document.getElementById('btnContinuarVsl1');
       if (btn) {
         setTimeout(() => {
-          btn.style.display = 'inline-block';
+          btn.style.display = 'block';
           btn.style.animation = 'fadeInBtn 0.5s ease';
-        }, 152000); // 152 segundos
+        }, 152000); // 152 segundos (2:32)
       }
     }
   }
