@@ -663,6 +663,8 @@
     // Mostrar logo por padrão (será escondida só na tela do VSL1)
     const _lg = document.getElementById('headerLogo');
     if (_lg && next !== 4) _lg.style.visibility = 'visible';
+    const _sc = document.querySelector('.saldo-card');
+    if (_sc && next !== 4) _sc.style.visibility = 'visible';
     const cur = document.getElementById('screen-' + currentScreen);
     cur.classList.add('exit');
     setTimeout(() => cur.classList.remove('active','exit'), 300);
@@ -686,6 +688,8 @@
     if (next === 4) {
       const lg = document.getElementById('headerLogo');
       if (lg) lg.style.visibility = 'hidden';
+      const sc = document.querySelector('.saldo-card');
+      if (sc) sc.style.visibility = 'hidden';
       setTimeout(() => applyVsl1(), 300);
     }
     if (next === 7) {
@@ -1086,6 +1090,9 @@
         setTimeout(() => {
           btn.style.display = 'block';
           btn.style.animation = 'fadeInBtn 0.5s ease';
+          // Mostrar o saldo junto com o botão
+          const sc = document.querySelector('.saldo-card');
+          if (sc) sc.style.visibility = 'visible';
         }, 152000); // 152 segundos (2:32)
       }
     }
