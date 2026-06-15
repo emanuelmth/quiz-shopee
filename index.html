@@ -413,6 +413,7 @@
       </div>
       <button class="btn-continuar" id="btnContinuarVsl1" onclick="goToScreen(5)" style="display:none; position:absolute; left:50%; bottom:16px; transform:translateX(-50%); z-index:10; white-space:nowrap;">Continuar →</button>
     </div>
+    <div id="vsl1ProgressSlot" style="width:100%; max-width:400px; margin:12px auto 0;"></div>
   </div>
 </div>
 
@@ -665,6 +666,16 @@
     if (_lg && next !== 4) _lg.style.visibility = 'visible';
     const _sc = document.querySelector('.saldo-card');
     if (_sc && next !== 4) _sc.style.visibility = 'visible';
+    // Devolver a barra de progresso ao rodapé fixo (se não for a tela do VSL1)
+    if (next !== 4) {
+      const _pw = document.getElementById('progressWrap');
+      if (_pw && _pw.parentElement && _pw.parentElement.id === 'vsl1ProgressSlot') {
+        _pw.style.position = 'fixed';
+        _pw.style.padding = '14px 48px 26px';
+        _pw.style.background = 'linear-gradient(to top, rgba(8,10,12,0.97) 0%, transparent 100%)';
+        document.body.appendChild(_pw);
+      }
+    }
     const cur = document.getElementById('screen-' + currentScreen);
     cur.classList.add('exit');
     setTimeout(() => cur.classList.remove('active','exit'), 300);
@@ -690,6 +701,15 @@
       if (lg) lg.style.visibility = 'hidden';
       const sc = document.querySelector('.saldo-card');
       if (sc) sc.style.visibility = 'hidden';
+      // Mover a barra de progresso para baixo do vídeo
+      const pw = document.getElementById('progressWrap');
+      const slot = document.getElementById('vsl1ProgressSlot');
+      if (pw && slot) {
+        pw.style.position = 'static';
+        pw.style.padding = '0';
+        pw.style.background = 'none';
+        slot.appendChild(pw);
+      }
       setTimeout(() => applyVsl1(), 300);
     }
     if (next === 7) {
