@@ -302,6 +302,28 @@
   .admin-msg.error { background: rgba(245,82,10,0.12); color: #f5520a; }
   #adminLogin, #adminPanel { width: 100%; }
 
+
+  @keyframes fadeInBtn {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Ajustes mobile para a tela do VSL */
+  @media (max-width: 600px) {
+    .vsl-content {
+      margin-top: 70px;
+      margin-bottom: 60px;
+      gap: 16px;
+      padding: 0 8px;
+    }
+    .vsl-label { font-size: 14px; }
+    .btn-continuar {
+      padding: 14px 40px;
+      font-size: 15px;
+      width: auto;
+      max-width: 90%;
+    }
+  }
 </style>
 </head>
 <body>
@@ -388,7 +410,7 @@
       <div class="vsl-play">▶</div>
       <span>Clique para assistir</span>
     </div>
-    <button class="btn-continuar" onclick="goToScreen(5)">Continuar →</button>
+    <button class="btn-continuar" id="btnContinuarVsl1" onclick="goToScreen(5)" style="display:none;">Continuar →</button>
   </div>
 </div>
 
@@ -1044,9 +1066,22 @@
     }, 100);
   }
 
-    function applyVsl1() {
+    let _vsl1TimerStarted = false;
+  function applyVsl1() {
     const vsl1 = (REMOTE_CONFIG && REMOTE_CONFIG.vsl1) ? REMOTE_CONFIG.vsl1 : DEFAULT_VSL1;
     injectEmbed(document.getElementById('vsl1Box'), vsl1);
+
+    // Timer: botão "Continuar" aparece aos 2:32 (152s) do vídeo de 2:37
+    if (!_vsl1TimerStarted) {
+      _vsl1TimerStarted = true;
+      const btn = document.getElementById('btnContinuarVsl1');
+      if (btn) {
+        setTimeout(() => {
+          btn.style.display = 'inline-block';
+          btn.style.animation = 'fadeInBtn 0.5s ease';
+        }, 152000); // 152 segundos
+      }
+    }
   }
 
   function applyVsl2() {
