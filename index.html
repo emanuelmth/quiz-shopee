@@ -619,13 +619,13 @@
 
 <script>
   const steps = [
-    { screen:1, progress:1/6, saldo:0,    label:"1/6" },  // entra na tela 1
-    { screen:2, progress:2/6, saldo:100,  label:"2/6" },  // entra na tela 2
-    { screen:3, progress:3/6, saldo:250,  label:"3/6" },  // entra na tela 3
-    { screen:4, progress:4/6, saldo:470,  label:"4/6" },  // entra na tela 4 (VSL)
-    { screen:5, progress:5/6, saldo:740,  label:"5/6" },  // clica continuar VSL — +270
-    { screen:6, progress:6/6, saldo:1060, label:"6/6" },  // responde perg. 4 — +320
-    { screen:7, progress:6/6, saldo:1460, label:"6/6" },  // responde perg. 5 — +400
+    { screen:1, progress:1/6, saldo:50,   label:"1/6" },  // entra na tela 1 (já com ganho inicial de 50)
+    { screen:2, progress:2/6, saldo:150,  label:"2/6" },  // entra na tela 2 — +100
+    { screen:3, progress:3/6, saldo:300,  label:"3/6" },  // entra na tela 3 — +150
+    { screen:4, progress:4/6, saldo:520,  label:"4/6" },  // entra na tela 4 (VSL) — +220
+    { screen:5, progress:5/6, saldo:790,  label:"5/6" },  // clica continuar VSL — +270
+    { screen:6, progress:6/6, saldo:1110, label:"6/6" },  // responde perg. 4 — +320
+    { screen:7, progress:6/6, saldo:1510, label:"6/6" },  // responde perg. 5 — +400
   ];
 
   let currentScreen = 0;
