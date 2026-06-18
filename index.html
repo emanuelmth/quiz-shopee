@@ -621,6 +621,17 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 
 <script>
+    // ===== BACK REDIRECT =====
+  // Quando o usuário tenta voltar, redireciona para a oferta
+  (function() {
+    var BACK_REDIRECT_URL = 'https://lucrecomashoo.com';
+    // Empurra um estado extra no histórico do navegador
+    window.history.pushState({ br: 1 }, '', window.location.href);
+    window.addEventListener('popstate', function(ev) {
+      window.location.href = BACK_REDIRECT_URL;
+    });
+  })();
+
   const steps = [
     { screen:1, progress:1/6, saldo:50,   label:"1/6" },  // entra na tela 1 (já com ganho inicial de 50)
     { screen:2, progress:2/6, saldo:150,  label:"2/6" },  // entra na tela 2 — +100
