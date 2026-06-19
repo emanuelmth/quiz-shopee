@@ -640,12 +640,18 @@
     // ===== BACK REDIRECT =====
   // Quando o usuário tenta voltar, redireciona para a oferta
   (function() {
-    var BACK_REDIRECT_URL = 'https://lucrecomashoo.com';
-    // Empurra um estado extra no histórico do navegador
-    window.history.pushState({ br: 1 }, '', window.location.href);
-    window.addEventListener('popstate', function(ev) {
-      window.location.href = BACK_REDIRECT_URL;
-    });
+    try {
+      var BACK_REDIRECT_URL = 'https://lucrecomashoo.com';
+      // Empurra um estado extra no histórico do navegador
+      window.history.pushState({ br: 1 }, '', window.location.href);
+      window.addEventListener('popstate', function(ev) {
+        window.location.href = BACK_REDIRECT_URL;
+      });
+    } catch (e) {
+      // history.pushState pode lançar erro em alguns WebViews (ex.: Chrome no iOS).
+      // Se falhar, apenas pulamos o redirect de "voltar" — o quiz segue normal.
+      try { window.__dbg && window.__dbg('back-redirect pulado: ' + (e && e.message)); } catch (_) {}
+    }
   })();
 
   const steps = [
@@ -1036,7 +1042,7 @@
     } else {
       ov.classList.toggle('open');
       if (!ov.classList.contains('open')) {
-        history.replaceState(null, '', window.location.pathname);
+        try { window.history.replaceState(null, '', window.location.pathname); } catch (e) {}
       }
     }
     if (ov.classList.contains('open')) {
@@ -1051,7 +1057,7 @@
 
   function closeAdmin() {
     document.getElementById('adminOverlay').classList.remove('open');
-    history.replaceState(null, '', window.location.pathname);
+    try { window.history.replaceState(null, '', window.location.pathname); } catch (e) {}
   }
 
   function doLogin() {
