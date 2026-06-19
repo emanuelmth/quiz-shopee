@@ -738,6 +738,23 @@
       setTimeout(() => applyVsl2(), 300);
       sendWebhook(2, { quiz_completo: true });
     }
+    // Rede de segurança: em alguns navegadores (ex.: Chrome no iOS) a animação de
+    // transição às vezes trava. Passado o tempo da animação, força exatamente uma
+    // tela ativa, independente de a animação ter completado.
+    setTimeout(function () {
+      var alvo = 'screen-' + currentScreen;
+      var telas = document.querySelectorAll('.screen');
+      for (var t = 0; t < telas.length; t++) {
+        if (telas[t].id === alvo) {
+          telas[t].classList.add('active');
+          telas[t].classList.remove('exit');
+          telas[t].style.opacity = '';
+          telas[t].style.transform = '';
+        } else {
+          telas[t].classList.remove('active', 'exit');
+        }
+      }
+    }, 480);
   }
 
   function goBack() {
@@ -791,13 +808,7 @@
     try { var _ae = document.activeElement; if (_ae && _ae.blur) _ae.blur(); } catch (e) {}
     document.getElementById('header').style.display = 'flex';
     document.getElementById('progressWrap').style.display = 'block';
-    if (typeof requestAnimationFrame === 'function') {
-      requestAnimationFrame(function () {
-        requestAnimationFrame(function () { goToScreen(1); });
-      });
-    } else {
-      setTimeout(function () { goToScreen(1); }, 60);
-    }
+    goToScreen(1);
   }
 
   function selectOption(el, next) {
