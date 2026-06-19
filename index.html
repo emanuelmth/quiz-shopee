@@ -4,6 +4,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lucre com Shopee — Quiz</title>
+<script>
+(function(){
+  function show(msg){
+    try{
+      var b=document.getElementById('__err');
+      if(!b){b=document.createElement('div');b.id='__err';b.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:999999;background:#c00;color:#fff;font:12px/1.5 monospace;padding:10px;white-space:pre-wrap;max-height:55%;overflow:auto';(document.body||document.documentElement).appendChild(b);}
+      b.appendChild(document.createTextNode(msg+'\n'));
+    }catch(e){}
+  }
+  function on(){ return location.search.indexOf('debug')>=0; }
+  window.addEventListener('error',function(e){ if(on()) show((e.message||'erro')+' @ '+((e.filename||'').split('/').pop())+':'+(e.lineno||'')+':'+(e.colno||'')); });
+  window.addEventListener('unhandledrejection',function(e){ if(on()) show('promise: '+((e.reason&&e.reason.message)||e.reason||'')); });
+})();
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -705,7 +719,7 @@
     const stepIdx = next === 7 ? 6 : next - 1;
     const step = steps[stepIdx];
     if (step) {
-      const prevSaldo = stepIdx > 0 ? (steps[stepIdx-1]?.saldo ?? 0) : 0;
+      const prevSaldo = stepIdx > 0 ? ((steps[stepIdx-1] && steps[stepIdx-1].saldo) || 0) : 0;
       updateSaldo(step.saldo, prevSaldo);
       document.getElementById('progressFill').style.width = (step.progress * 100) + '%';
       document.getElementById('progressStep').textContent = step.label;
