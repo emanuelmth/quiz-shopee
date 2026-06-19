@@ -1188,8 +1188,7 @@
 
     // ---- WEBHOOKS ----
   async function sendWebhook(type, extraData = {}) {
-    const url = localStorage.getItem(type === 1 ? 'webhook1' : 'webhook2');
-    if (!url) return;
+    const url = WORKER_URL + (type === 1 ? '/webhook1' : '/webhook2');
     const payload = {
       nome: window._userName || '',
       whatsapp: window._userWhats || '',
