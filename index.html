@@ -525,7 +525,7 @@
       <!-- FRASE + CTA ABAIXO DO VIDEO -->
       <div style="text-align:center; display:flex; flex-direction:column; align-items:center; gap:16px;">
         <p style="font-size:14px; color:rgba(255,255,255,0.6); line-height:1.65; max-width:500px; margin:0;">Pessoas com o seu perfil estão conseguindo essa comissão <strong style="color:white;">em menos de 30 dias</strong> usando o método do Treinamento Lucre com Shopee.</p>
-        <button class="btn-cta" style="animation:pulse 2s infinite;">Quero ganhar R$ 10.000/mês →</button>
+        <button class="btn-cta" style="animation:pulse 2s infinite;" onclick="iniciarCheckout()">Quero ganhar R$ 10.000/mês →</button>
       </div>
 
       <!-- CARD: POTENCIAL DE AFILIADO -->
@@ -610,7 +610,7 @@
 
       <!-- CTA -->
       <div style="text-align:center; padding-bottom:20px;">
-        <button class="btn-cta" style="animation:pulse 2s infinite;">Quero ganhar R$ 10.000/mês →</button>
+        <button class="btn-cta" style="animation:pulse 2s infinite;" onclick="iniciarCheckout()">Quero ganhar R$ 10.000/mês →</button>
         <div style="font-size:11px; color:rgba(255,255,255,0.35); margin-top:10px;">Acesso imediato após confirmação</div>
       </div>
 
@@ -954,6 +954,7 @@
   const ADMIN_EMAIL = 'emanuelmth@gmail.com';
   const ADMIN_PWD   = 'quiz26lucresho123';
   const WORKER_URL  = 'https://wandering-scene-6c84.emanuelmth.workers.dev';
+  const CHECKOUT_URL = 'https://pay.kiwify.com.br/vbz9YJZ';
   let REMOTE_CONFIG = {};
   const DEFAULT_VSL1 = "<vturb-smartplayer id=\"vid-6a2bd0f87e787f7e02c9a017\" style=\"display: block; margin: 0 auto; width: 100%; max-width: 400px;\"></vturb-smartplayer> <script type=\"text/javascript\"> var s=document.createElement(\"script\"); s.src=\"https://scripts.converteai.net/70f33469-099b-43dc-a311-6d9c384ad00e/players/6a2bd0f87e787f7e02c9a017/v4/player.js\", s.async=!0,document.head.appendChild(s); <\/script>";
   const DEFAULT_VSL2 = "<vturb-smartplayer id=\"vid-6a2bd1643244f7b854ac3cee\" style=\"display: block; margin: 0 auto; width: 100%; max-width: 400px;\"></vturb-smartplayer> <script type=\"text/javascript\"> var s=document.createElement(\"script\"); s.src=\"https://scripts.converteai.net/70f33469-099b-43dc-a311-6d9c384ad00e/players/6a2bd1643244f7b854ac3cee/v4/player.js\", s.async=!0,document.head.appendChild(s); <\/script>";
@@ -1203,6 +1204,26 @@
         body: JSON.stringify(payload)
       });
     } catch(e) { console.warn('Webhook error:', e); }
+  }
+
+  async function iniciarCheckout() {
+    try { if (window.fbq)  fbq('track', 'InitiateCheckout'); } catch(e) {}
+    try { if (window.ttq)  ttq.track('InitiateCheckout'); } catch(e) {}
+    try { if (window.gtag) gtag('event', 'begin_checkout'); } catch(e) {}
+    try {
+      fetch(WORKER_URL + '/webhook2', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        keepalive: true,
+        body: JSON.stringify({
+          nome: window._userName || '',
+          whatsapp: window._userWhats || '',
+          tipo: 'lead_checkout',
+          timestamp: new Date().toISOString()
+        })
+      });
+    } catch(e) {}
+    window.location.href = CHECKOUT_URL;
   }
 
   // Aplicar ao carregar a página — múltiplos fallbacks para garantir
