@@ -14,8 +14,10 @@
     }catch(e){}
   }
   function on(){ return location.search.indexOf('debug')>=0; }
-  window.addEventListener('error',function(e){ if(on()) show((e.message||'erro')+' @ '+((e.filename||'').split('/').pop())+':'+(e.lineno||'')+':'+(e.colno||'')); });
-  window.addEventListener('unhandledrejection',function(e){ if(on()) show('promise: '+((e.reason&&e.reason.message)||e.reason||'')); });
+  window.__show = function(m){ if(on()) show(m); };
+  window.__dbg = function(m){ if(on()) show('· '+m); };
+  window.addEventListener('error',function(e){ if(on()) show('ERR: '+(e.message||'erro')+' @ '+((e.filename||'').split('/').pop())+':'+(e.lineno||'')+':'+(e.colno||'')); });
+  window.addEventListener('unhandledrejection',function(e){ if(on()) show('REJ: '+((e.reason&&e.reason.message)||e.reason||'')); });
 })();
 </script>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -822,7 +824,13 @@
     try { var _ae = document.activeElement; if (_ae && _ae.blur) _ae.blur(); } catch (e) {}
     document.getElementById('header').style.display = 'flex';
     document.getElementById('progressWrap').style.display = 'block';
-    goToScreen(1);
+    try { window.__dbg && window.__dbg('liberar: antes goToScreen(1)'); } catch (e) {}
+    try {
+      goToScreen(1);
+      try { window.__dbg && window.__dbg('liberar: goToScreen(1) OK'); } catch (e) {}
+    } catch (err) {
+      try { window.__show && window.__show('goToScreen ERRO: ' + (err.message || err) + ' | ' + ((err.stack || '').split('\n')[1] || '')); } catch (e) {}
+    }
   }
 
   function selectOption(el, next) {
@@ -1001,7 +1009,9 @@
     } catch(e) {
       console.warn('Config remota indisponivel, usando padroes.', e);
     }
-    applyPixels();
+    try { window.__dbg && window.__dbg('config carregada; chamando applyPixels'); } catch(e) {}
+    try { applyPixels(); try { window.__dbg && window.__dbg('applyPixels OK'); } catch(e){} }
+    catch (err) { try { window.__show && window.__show('applyPixels ERRO: ' + (err.message || err)); } catch(e){} }
     // applyVslEmbeds NÃO é chamado aqui — vídeos só injetam ao chegar na tela certa
   }
 
