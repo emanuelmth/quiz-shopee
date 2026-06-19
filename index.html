@@ -785,9 +785,19 @@
     window._userName = nome;
     window._userWhats = whats;
     try { sendWebhook(1); } catch (e) {}
+    // No Chrome do Android, o teclado fechando no meio da transição trava a
+    // animação (a logo do header aparece mas o screen-0 não sai). Tirar o foco
+    // do campo e esperar o layout assentar antes de trocar de tela resolve.
+    try { var _ae = document.activeElement; if (_ae && _ae.blur) _ae.blur(); } catch (e) {}
     document.getElementById('header').style.display = 'flex';
     document.getElementById('progressWrap').style.display = 'block';
-    goToScreen(1);
+    if (typeof requestAnimationFrame === 'function') {
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () { goToScreen(1); });
+      });
+    } else {
+      setTimeout(function () { goToScreen(1); }, 60);
+    }
   }
 
   function selectOption(el, next) {
