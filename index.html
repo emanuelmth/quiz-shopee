@@ -529,7 +529,7 @@
         <!-- Saldo sobreposto no topo do video -->
         <div style="position:absolute; top:3px; left:50%; transform:translateX(-50%); z-index:10; background:rgba(8,10,12,0.82); border:1px solid rgba(69,245,53,0.35); border-radius:10px; padding:5px 14px; display:flex; flex-direction:column; align-items:center; backdrop-filter:blur(4px);">
           <div style="font-size:9px; color:rgba(255,255,255,0.55); letter-spacing:0.03em;">Comissão estimada mensal</div>
-          <div style="font-size:18px; font-weight:800; color:#45f535; letter-spacing:-0.02em; text-shadow:0 0 16px rgba(69,245,53,0.4); line-height:1.1;">R$ 1.510,00</div>
+          <div style="font-size:18px; font-weight:800; color:#45f535; letter-spacing:-0.02em; text-shadow:0 0 16px rgba(69,245,53,0.4); line-height:1.1;">R$ 3.382,00</div>
         </div>
         <div id="vsl2Box" style="width:100%; aspect-ratio:16/6; background:rgba(255,255,255,0.04); border:1.5px solid rgba(255,255,255,0.1); border-radius:18px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; position:relative; overflow:hidden;">
           <div style="position:absolute; inset:0; background:radial-gradient(ellipse at center, rgba(245,82,10,0.08) 0%, transparent 70%);"></div>
@@ -561,7 +561,7 @@
             <text x="50" y="59" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="8" font-family="Poppins">POTENCIAL</text>
           </svg>
           <div style="display:flex; flex-direction:column; gap:4px;">
-            <div style="font-size:24px; font-weight:800; color:#45f535; letter-spacing:-0.02em;">R$ 1.510</div>
+            <div style="font-size:24px; font-weight:800; color:#45f535; letter-spacing:-0.02em;">R$ 3.382</div>
             <div style="font-size:11px; color:rgba(255,255,255,0.45);">estimativa inicial/mês</div>
             <div style="display:inline-flex; background:rgba(245,82,10,0.15); border:1px solid rgba(245,82,10,0.25); border-radius:8px; padding:3px 9px; font-size:11px; font-weight:600; color:#f5520a; margin-top:4px;">96% — potencial confirmado</div>
           </div>
@@ -655,13 +655,13 @@
   })();
 
   const steps = [
-    { screen:1, progress:1/6, saldo:50,   label:"1/6" },  // entra na tela 1 (já com ganho inicial de 50)
-    { screen:2, progress:2/6, saldo:150,  label:"2/6" },  // entra na tela 2 — +100
-    { screen:3, progress:3/6, saldo:300,  label:"3/6" },  // entra na tela 3 — +150
-    { screen:4, progress:4/6, saldo:520,  label:"4/6" },  // entra na tela 4 (VSL) — +220
-    { screen:5, progress:5/6, saldo:790,  label:"5/6" },  // clica continuar VSL — +270
-    { screen:6, progress:6/6, saldo:1110, label:"6/6" },  // responde perg. 4 — +320
-    { screen:7, progress:6/6, saldo:1510, label:"6/6" },  // responde perg. 5 — +400
+    { screen:1, progress:1/6, saldo:100,  label:"1/6" },  // entra na tela 1 (dobro de 50)
+    { screen:2, progress:2/6, saldo:300,  label:"2/6" },  // entra na tela 2 (dobro de 150)
+    { screen:3, progress:3/6, saldo:600,  label:"3/6" },  // entra na tela 3 (dobro de 300)
+    { screen:4, progress:4/6, saldo:1040, label:"4/6" },  // entra na tela 4 (VSL) (dobro de 520)
+    { screen:5, progress:5/6, saldo:1580, label:"5/6" },  // clica continuar VSL (dobro de 790)
+    { screen:6, progress:6/6, saldo:2486, label:"6/6" },  // responde perg. 4 (1110 × 2,24)
+    { screen:7, progress:6/6, saldo:3382, label:"6/6" },  // responde perg. 5 (1510 × 2,24)
   ];
 
   let currentScreen = 0;
